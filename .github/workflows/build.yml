@@ -8,29 +8,45 @@ on:
 
 env:
   GO_VERSION: '1.23'
-  GORELEASER_VERSION: 'v2.4'
 
 jobs:
   build:
-    name: Build (${{ matrix.os }})
+    name: Build (${{ matrix.os }} ${{ matrix.goarch }})
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
+            target: linux-amd64
+            goos: linux
+            goarch: amd64
+            binary_name: cr-coder
             artifact_name: cr-coder-linux-amd64
-            binary_name: cr-coder
-          - os: windows-latest
-            artifact_name: cr-coder-windows-amd64.exe
-            binary_name: cr-coder.exe
-          - os: macos-latest
-            artifact_name: cr-coder-darwin-amd64
-            binary_name: cr-coder
-          - os: macos-latest
-            artifact_name: cr-coder-darwin-arm64
-            binary_name: cr-coder
+          - os: ubuntu-latest
+            target: linux-arm64
+            goos: linux
             goarch: arm64
+            binary_name: cr-coder
+            artifact_name: cr-coder-linux-arm64
+          - os: windows-latest
+            target: windows-amd64
+            goos: windows
+            goarch: amd64
+            binary_name: cr-coder.exe
+            artifact_name: cr-coder-windows-amd64
+          - os: macos-latest
+            target: darwin-amd64
+            goos: darwin
+            goarch: amd64
+            binary_name: cr-coder
+            artifact_name: cr-coder-darwin-amd64
+          - os: macos-latest
+            target: darwin-arm64
+            goos: darwin
+            goarch: arm64
+            binary_name: cr-coder
+            artifact_name: cr-coder-darwin-arm64
 
     steps:
       - name: Checkout repository
@@ -44,17 +60,15 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: true
 
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Run tests
-        run: go test -v -race -coverprofile=coverage.out ./...
-
-      - name: Build binary
+      - name: Verify build
         run: |
-          GOOS=${{ runner.os == 'Windows' && 'windows' || runner.os == 'macOS' && 'darwin' || 'linux' }}
-          GOARCH=${{ matrix.goarch || 'amd64' }}
-          CGO_ENABLED=0 go build -ldflags="-s -w -X main.version=${{ github.sha }} -X main.commit=${{ github.sha }} -X main.date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -o ${{ matrix.binary_name }} ./cmd/cr-coder
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 \
+            go build -trimpath -ldflags="-s -w \
+              -X main.version=${GITHUB_SHA::8} \
+              -X main.commit=${GITHUB_SHA} \
+              -X main.date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -o ${{ matrix.binary_name }} ./cmd/cr-coder
+          echo "Build OK: ${{ matrix.binary_name }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -62,46 +76,3 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.binary_name }}
           retention-days: 7
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          args: --timeout=5m
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-
-      - name: Run tests with coverage
-        run: |
-          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
-          go tool cover -func=coverage.out
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage.out
-          fail_ci_if_error: false

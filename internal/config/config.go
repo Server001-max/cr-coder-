@@ -18,15 +18,16 @@ type Config struct {
 }
 
 type LLMConfig struct {
-	Provider       string `yaml:"provider"`        // "ollama", "llamacpp", "openai", "anthropic", "groq", "openrouter"
-	Model          string `yaml:"model"`           // model name
-	BaseURL        string `yaml:"base_url"`        // for ollama/llamacpp/openai-compatible
-	APIKey         string `yaml:"api_key"`         // for API providers
-	Temperature    float64 `yaml:"temperature"`    // 0.0-1.0
-	MaxTokens      int    `yaml:"max_tokens"`      // max output tokens
-	ContextWindow  int    `yaml:"context_window"`  // context window size
-	AutoDownload   bool   `yaml:"auto_download"`   // auto-download model if missing
-	DefaultModel   string `yaml:"default_model"`   // default model to use
+	Provider      string  `yaml:"provider"`        // "ollama", "llamacpp", "openai", "anthropic", "groq", "openrouter"
+	Model         string  `yaml:"model"`           // model name
+	BaseURL       string  `yaml:"base_url"`        // for ollama/llamacpp/openai-compatible
+	APIKey        string  `yaml:"api_key"`         // for API providers
+	Temperature   float64 `yaml:"temperature"`     // 0.0-1.0
+	MaxTokens     int     `yaml:"max_tokens"`      // max output tokens
+	ContextWindow int     `yaml:"context_window"`  // context window size
+	AutoDownload  bool    `yaml:"auto_download"`   // auto-download model if missing
+	DefaultModel  string  `yaml:"default_model"`   // default model to use
+	ModelsDir     string  `yaml:"models_dir"`      // local models directory (for llama.cpp)
 }
 
 type AgentConfig struct {
@@ -79,6 +80,7 @@ func DefaultConfig() *Config {
 			ContextWindow: 32768,
 			AutoDownload:  true,
 			DefaultModel:  "qwen2.5-coder:7b",
+			ModelsDir:     modelsDir,
 		},
 		Agent: AgentConfig{
 			MaxSteps:       50,

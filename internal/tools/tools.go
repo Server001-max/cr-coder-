@@ -2,7 +2,6 @@ package tools
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -575,7 +574,7 @@ func (t *GitTool) Execute(ctx context.Context, args map[string]interface{}) (str
 		}
 	}
 
-	cmd := exec.CommandContext(ctx, append([]string{"git", command}, gitArgs...)...)
+	cmd := exec.CommandContext(ctx, "git", append([]string{command}, gitArgs...)...)
 	cmd.Dir = t.base.workingDir
 
 	output, err := cmd.CombinedOutput()

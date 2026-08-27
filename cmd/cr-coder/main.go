@@ -23,7 +23,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	llmRouter := router.New(cfg.LLM)
+	llmRouter := router.New(&cfg.LLM)
 
 	rootCmd := &cobra.Command{
 		Use:     "cr-coder",

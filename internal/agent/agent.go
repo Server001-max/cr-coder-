@@ -2,16 +2,15 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/Server001-max/cr-coder/internal/config"
+	"github.com/Server001-max/cr-coder/internal/llm/router"
 	"github.com/Server001-max/cr-coder/internal/llm/types"
-	"github.com/Server001-max/cr-coder/internal/tools"
 	"github.com/Server001-max/cr-coder/internal/session"
+	"github.com/Server001-max/cr-coder/internal/tools"
 )
 
 const systemPrompt = `You are CR CODER, an expert AI coding agent that helps users with software development tasks.
@@ -116,8 +115,8 @@ func Run(cfg *config.Config, r *router.Router, task string) error {
 
 func newAgent(cfg *config.Config, r *router.Router) *Agent {
 	wd, _ := os.Getwd()
-	toolReg := tools.NewRegistry(cfg.Tools)
-	sess := session.New(cfg.Session)
+	toolReg := tools.NewRegistry(&cfg.Tools)
+	sess := session.New(&cfg.Session)
 
 	return &Agent{
 		config:     cfg,
