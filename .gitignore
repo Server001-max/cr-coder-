@@ -1,0 +1,48 @@
+# Binaries
+cr-coder
+cr-coder.exe
+cr-coder-*
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local config
+.env
+.env.local
+
+# Coverage
+coverage.out
+coverage.html
+*.cover
+
+# Build artifacts
+/dist/
+/build/
+/bin/
+
+# Local models cache
+/models/
+*.gguf
+*.bin
+
+# Logs
+*.log
